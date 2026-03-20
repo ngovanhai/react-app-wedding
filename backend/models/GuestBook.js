@@ -1,33 +1,29 @@
 const mongoose = require('mongoose');
 
 const guestBookSchema = new mongoose.Schema({
-  weddingId: {
+  albumId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Album',
     required: true
   },
   guestName: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   message: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
-  mediaUrls: [{
+  photoUrl: {
     type: String
-  }],
-  timestamp: {
-    type: Date,
-    default: Date.now
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
   }
 }, {
   timestamps: true
 });
+
+// Index for albumId for faster lookups
+guestBookSchema.index({ albumId: 1 });
 
 module.exports = mongoose.model('GuestBook', guestBookSchema);

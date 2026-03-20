@@ -3,6 +3,7 @@
 const { Album, GuestBookEntry } = require('../models');
 const path = require('path');
 const fs = require('fs');
+const { loveStoryService } = require('./loveStoryService');
 
 // Album services
 const albumService = {
@@ -114,5 +115,6 @@ const guestBookService = {
 
 module.exports = {
   albumService,
-  guestBookService
+  guestBookService,
+  loveStoryService
 };

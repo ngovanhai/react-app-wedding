@@ -2,16 +2,21 @@
 
 const express = require('express');
 const router = express.Router();
-const { albumController, guestBookController } = require('../controllers');
+const authRoutes = require('./authRoutes');
+const loveStoryRoutes = require('./loveStoryRoutes');
+const albumRoutes = require('./albumRoutes');
+const guestBookRoutes = require('./guestBookRoutes');
+
+// Auth routes
+router.use('/auth', authRoutes);
 
 // Album routes
-router.post('/albums', albumController.createAlbum);
-router.get('/albums/:shareCode', albumController.getAlbum);
-router.put('/albums/:albumId', albumController.updateAlbum);
-router.post('/albums/:albumId/photos', albumController.addPhotos);
+router.use('/albums', albumRoutes);
 
-// Guest book routes
-router.post('/guestbook/:albumShareCode', guestBookController.addEntry);
-router.get('/guestbook/:albumShareCode', guestBookController.getEntries);
+// Guest book routes  
+router.use('/albums', guestBookRoutes);
+
+// Love story routes
+router.use('/love-story', loveStoryRoutes);
 
 module.exports = router;

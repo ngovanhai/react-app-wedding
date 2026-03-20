@@ -94,11 +94,61 @@ const guestBookEntrySchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Timeline Event Schema
+const timelineEventSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String
+  },
+  date: {
+    type: Date,
+    required: true
+  },
+  photoUrl: {
+    type: String
+  },
+  albumId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Album',
+    required: true
+  },
+  order: {
+    type: Number,
+    default: 0
+  }
+}, {
+  timestamps: true
+});
+
+// LoveStory Schema
+const loveStorySchema = new mongoose.Schema({
+  albumId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Album',
+    required: true,
+    unique: true
+  },
+  coupleName: {
+    type: String
+  },
+  storyIntroduction: {
+    type: String
+  },
+  timeline: [timelineEventSchema]
+}, {
+  timestamps: true
+});
+
 // Export models
 const Album = mongoose.model('Album', albumSchema);
 const GuestBookEntry = mongoose.model('GuestBookEntry', guestBookEntrySchema);
+const LoveStory = mongoose.model('LoveStory', loveStorySchema);
 
 module.exports = {
   Album,
-  GuestBookEntry
+  GuestBookEntry,
+  LoveStory
 };
