@@ -1,0 +1,51 @@
+{
+  "common": {
+    "welcome": "Welcome to Wedding Album",
+    "login": "Login",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error"
+  },
+  "wedding": {
+    "createWedding": "Create Wedding Album",
+    "editWedding": "Edit Wedding Album",
+    "weddingDetails": "Wedding Details",
+    "guestList": "Guest List",
+    "title": "Title",
+    "description": "Description",
+    "date": "Wedding Date",
+    "location": "Location",
+    "coupleNames": "Bride & Groom Names"
+  },
+  "media": {
+    "uploadPhoto": "Upload Photo",
+    "uploadVideo": "Upload Video",
+    "photoGallery": "Photo Gallery",
+    "videoGallery": "Video Gallery",
+    "selectFiles": "Select Files",
+    "uploading": "Uploading...",
+    "uploaded": "Uploaded"
+  },
+  "pricing": {
+    "freePlan": "Free Plan",
+    "basicPlan": "Basic Plan",
+    "premiumPlan": "Premium Plan",
+    "upgrade": "Upgrade",
+    "subscription": "Subscription",
+    "features": "Features",
+    "storage": "Storage",
+    "support": "Support"
+  },
+  "errors": {
+    "validationError": "Validation Error",
+    "notFound": "Not Found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server Error",
+    "networkError": "Network Error"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "common": {
+    "welcome": "Chào mừng bạn đến với Album Cưới",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "loading": "Đang tải...",
+    "success": "Thành công",
+    "error": "Lỗi"
+  },
+  "wedding": {
+    "createWedding": "Tạo Album Cưới",
+    "editWedding": "Chỉnh sửa Album Cưới",
+    "weddingDetails": "Chi tiết đám cưới",
+    "guestList": "Danh sách khách mời",
+    "title": "Tiêu đề",
+    "description": "Mô tả",
+    "date": "Ngày cưới",
+    "location": "Địa điểm",
+    "coupleNames": "Tên cô dâu chú rể"
+  },
+  "media": {
+    "uploadPhoto": "Tải ảnh lên",
+    "uploadVideo": "Tải video lên",
+    "photoGallery": "Thư viện ảnh",
+    "videoGallery": "Thư viện video",
+    "selectFiles": "Chọn tệp tin",
+    "uploading": "Đang tải lên...",
+    "uploaded": "Đã tải lên"
+  },
+  "pricing": {
+    "freePlan": "Gói Miễn Phí",
+    "basicPlan": "Gói Cơ Bản",
+    "premiumPlan": "Gói Cao Cấp",
+    "upgrade": "Nâng cấp",
+    "subscription": "Đăng ký",
+    "features": "Tính năng",
+    "storage": "Dung lượng lưu trữ",
+    "support": "Hỗ trợ"
+  },
+  "errors": {
+    "validationError": "Lỗi xác thực dữ liệu",
+    "notFound": "Không tìm thấy",
+    "unauthorized": "Không được phép truy cập",
+    "serverError": "Lỗi máy chủ",
+    "networkError": "Lỗi kết nối mạng"
+  }
+}
