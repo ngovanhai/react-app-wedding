@@ -1,27 +1,62 @@
 # 📢 QUY TRÌNH BA - WEDDING ALBUM WEB
 
-## ⚠️ BẮT BUỘC: ĐẨY TẤT CẢ NGHIỆP VỤ LÊN GIT
+## ⚠️ QUY TRÌNH BẮT BUỘC
 
-Sau khi BA hoàn thành tài liệu nghiệp vụ (BR) và được PM review approve:
+### 1. BA Viết Nghiệp Vụ
+- Nhận task từ PM
+- Phân tích yêu cầu
+- Viết tài liệu BR (Business Requirements)
+- Lưu file local trong quá trình viết
 
-### 1. Commit & Push NGAY LẬP TỨC
+### 2. PM Review
+- BA gửi file cho PM review (qua chat)
+- PM đọc, góp ý, yêu cầu sửa (nếu cần)
+- BA chỉnh sửa theo feedback
+- PM approve ✅
+
+### 3. Push Lên Git (SAU KHI APPROVE)
 ```bash
 git add docs/business-requirements/
 git commit -m "docs: Add BR-XXX - [Tên nghiệp vụ]"
 git push origin master
 ```
 
-### 2. Không được:
-- ❌ Lưu file local trên máy
-- ❌ Gửi qua email/Zalo/Telegram
-- ❌ Chờ tích lũy nhiều file mới push
-- ❌ Để PM phải nhắc mới push
+### 4. Giao Cho DEV
+- Sau khi đã push lên git
+- PM giao task cho DEV
+- DEV đọc BR trên git để code
+- QA đọc BR để viết test case
 
-### 3. Lý do:
-- ✅ DEV cần đọc BR để code đúng
-- ✅ QA cần đọc BR để viết test case
-- ✅ PM cần track tiến độ
-- ✅ Backup tránh mất dữ liệu
+---
+
+## ❌ KHÔNG ĐƯỢC
+
+- Push lên git khi chưa được PM approve
+- Giao cho DEV khi chưa push lên git
+- Lưu file local mãi không push (sau khi đã approve)
+- Gửi BR qua email/Zalo làm bản chính thức
+
+---
+
+## ✅ WORKFLOW ĐÚNG
+
+```
+PM giao task 
+  ↓
+BA phân tích & viết BR (local)
+  ↓
+PM Review → (feedback → sửa → review lại)
+  ↓
+PM Approve ✅
+  ↓
+BA Push lên Git
+  ↓
+PM giao task cho DEV
+  ↓
+DEV đọc BR trên Git → Code
+  ↓
+QA đọc BR → Viết test case
+```
 
 ---
 
@@ -29,8 +64,9 @@ git push origin master
 
 - [ ] File đặt tên đúng: `BR-XXX-TenNghiepVu.md`
 - [ ] Đủ 6 sections (Mô tả, Actors, Flow, Rules, Edge Cases, AC)
+- [ ] Đã gửi PM review và được approve
 - [ ] Đã push lên GitHub
-- [ ] Thông báo cho PM trong chat: "BR-XXX đã sẵn sàng review"
+- [ ] Thông báo cho PM: "BR-XXX đã push, sẵn sàng giao DEV"
 
 ---
 
@@ -41,22 +77,7 @@ docs/
 ├── business-requirements/   ← BA lưu BR files ở đây
 │   ├── README.md
 │   ├── BR-001-UserRegistration.md
-│   ├── BR-002-AlbumManagement.md
-│   ├── BR-003-GuestBook.md
-│   └── BR-004-LoveStory.md
-├── database/                ← ERD, schema (DEV/BA cùng làm)
-└── api-specs/               ← API docs (DEV làm)
+│   └── ...
+├── database/                ← ERD, schema
+└── api-specs/               ← API docs
 ```
-
----
-
-## 🔄 WORKFLOW
-
-```
-PM giao task → BA phân tích → Viết BR → Push Git → PM Review → DEV Code → QA Test
-```
-
-**BA chịu trách nhiệm:**
-- Tài liệu BR rõ ràng, đầy đủ
-- Push lên git ngay sau khi viết xong
-- Update BR khi có thay đổi requirement
