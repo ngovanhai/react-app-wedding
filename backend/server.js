@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
-const albumRoutes = require('./routes');
+const albumRoutes = require('./src/routes');
 
 const app = express();
 
