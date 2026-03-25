@@ -1,102 +1,53 @@
 const QRCode = require('../models/QRCode');
-const Album = require('../models/Album');
-const { generateQRCode } = require('../services/qrcodeService');
+const { v4: uuidv4 } = require('uuid');
 
-// Create QR code for an album
-exports.createQRCode = async (req, res) => {
+exports.generate = async (req, res) => {
   try {
-    const { albumId } = req.params;
+    const { albumId, tableNumber } = req.body;
+    const qrId = uuidv4();
+    const code = Buffer.from(qrId).toString('base64');
+    const url = `${process.env.FRONTEND_URL}/album/${albumId}?qr=${qrId}`;
     
-    // Verify album exists and belongs to user
-    const album = await Album.findById(albumId);
-    if (!album) {
-      return res.status(404).json({ message: 'Album not found' });
-    }
-    
-    if (album.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-    
-    // Generate unique QR code
-    const uniqueCode = `${albumId}_${Date.now()}`;
-    const albumUrl = `${process.env.FRONTEND_URL}/album/${albumId}`;
-    
-    // Create QR code entry
-    const qrCode = new QRCode({
-      albumId,
-      code: uniqueCode,
-      url: albumUrl
-    });
-    
-    await qrCode.save();
-    
-    res.status(201).json({
-      success: true,
-      data: {
-        code: uniqueCode,
-        url: albumUrl,
-        qrCodeId: qrCode._id
-      }
-    });
+    const qrCode = await QRCode.create({ qrId, albumId, tableNumber, code, url });
+    res.status(201).json({ success: true, data: qrCode });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ success: false, error: error.message });
   }
 };
 
-// Get QR code details
-exports.getQRCode = async (req, res) => {
+exports.getByAlbum = async (req, res) => {
   try {
-    const { code } = req.params;
-    
-    const qrCode = await QRCode.findOne({ code, isActive: true })
-      .populate('albumId', 'title description coverImage privacySettings');
-    
-    if (!qrCode) {
-      return res.status(404).json({ message: 'QR code not found or expired' });
-    }
-    
-    // Check if QR code has expired
-    if (qrCode.expiresAt && new Date() > qrCode.expiresAt) {
-      qrCode.isActive = false;
-      await qrCode.save();
-      return res.status(404).json({ message: 'QR code has expired' });
-    }
-    
-    res.status(200).json({
-      success: true,
-      data: qrCode
-    });
+    const qrCodes = await QRCode.find({ albumId: req.params.albumId });
+    res.json({ success: true, data: qrCodes });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// Deactivate QR code
-exports.deactivateQRCode = async (req, res) => {
+exports.scan = async (req, res) => {
   try {
-    const { code } = req.params;
-    const userId = req.user.id;
-    
-    const qrCode = await QRCode.findOne({ code });
-    
-    if (!qrCode) {
-      return res.status(404).json({ message: 'QR code not found' });
-    }
-    
-    // Verify album ownership
-    const album = await Album.findById(qrCode.albumId);
-    if (album.userId.toString() !== userId) {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-    
-    qrCode.isActive = false;
-    await qrCode.save();
-    
-    res.status(200).json({
-      success: true,
-      message: 'QR code deactivated successfully'
-    });
+    const qrCode = await QRCode.findOneAndUpdate(
+      { qrId: req.params.qrId },
+      { $inc: { scanCount: 1 }, lastScannedAt: new Date() },
+      { new: true }
+    );
+    if (!qrCode) return res.status(404).json({ success: false, error: 'Not found' });
+    res.json({ success: true, data: qrCode });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.deactivate = async (req, res) => {
+  try {
+    const qrCode = await QRCode.findByIdAndUpdate(
+      req.params.qrId,
+      { isActive: false },
+      { new: true }
+    );
+    if (!qrCode) return res.status(404).json({ success: false, error: 'Not found' });
+    res.json({ success: true, data: qrCode });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };

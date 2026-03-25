@@ -1,15 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const qrcodeController = require('../controllers/qrcodeController');
-const auth = require('../middleware/auth');
 
-// Create QR code for an album
-router.post('/:albumId', auth, qrcodeController.createQRCode);
-
-// Get QR code details by code
-router.get('/:code', qrcodeController.getQRCode);
-
-// Deactivate QR code
-router.delete('/:code', auth, qrcodeController.deactivateQRCode);
+router.post('/', qrcodeController.generate);
+router.get('/album/:albumId', qrcodeController.getByAlbum);
+router.post('/:qrId/scan', qrcodeController.scan);
+router.delete('/:qrId', qrcodeController.deactivate);
 
 module.exports = router;

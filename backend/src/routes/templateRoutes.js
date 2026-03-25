@@ -1,26 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const {
-  createTemplate,
-  getTemplates,
-  getTemplateById,
-  updateTemplate,
-  deleteTemplate
-} = require('../controllers/templateController');
+const templateController = require('../controllers/templateController');
 
-// POST /api/templates - Create a new template
-router.post('/', createTemplate);
-
-// GET /api/templates - Get all templates
-router.get('/', getTemplates);
-
-// GET /api/templates/:templateId - Get template by ID
-router.get('/:templateId', getTemplateById);
-
-// PUT /api/templates/:templateId - Update template
-router.put('/:templateId', updateTemplate);
-
-// DELETE /api/templates/:templateId - Delete template
-router.delete('/:templateId', deleteTemplate);
+router.get('/', templateController.getAll);
+router.get('/:id', templateController.getById);
+router.post('/', templateController.create);
+router.put('/:id', templateController.update);
+router.delete('/:id', templateController.delete);
 
 module.exports = router;

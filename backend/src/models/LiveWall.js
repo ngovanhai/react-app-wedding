@@ -1,53 +1,22 @@
 const mongoose = require('mongoose');
 
 const liveWallSchema = new mongoose.Schema({
-  albumId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Album',
-    required: true
-  },
+  wallId: { type: String, required: true, unique: true },
+  albumId: { type: mongoose.Schema.Types.ObjectId, ref: 'Album', required: true },
   messages: [{
-    user: {
-      type: String,
-      default: 'Anonymous'
-    },
-    message: {
-      type: String,
-      required: true
-    },
-    timestamp: {
-      type: Date,
-      default: Date.now
-    },
-    approved: {
-      type: Boolean,
-      default: false
-    },
-    likes: {
-      type: Number,
-      default: 0
-    }
+    userId: String,
+    content: { type: String, required: true },
+    type: { type: String, enum: ['text', 'image', 'emoji'], default: 'text' },
+    likes: { type: Number, default: 0 },
+    isApproved: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
   }],
-  isActive: {
-    type: Boolean,
-    default: true
-  },
   settings: {
-    allowMessages: {
-      type: Boolean,
-      default: true
-    },
-    requireApproval: {
-      type: Boolean,
-      default: true
-    },
-    maxMessagesPerUser: {
-      type: Number,
-      default: 10
-    }
-  }
-}, {
-  timestamps: true
-});
+    autoApprove: { type: Boolean, default: false },
+    profanityFilter: { type: Boolean, default: true },
+    maxMessages: { type: Number, default: 100 }
+  },
+  isActive: { type: Boolean, default: true }
+}, { timestamps: true });
 
 module.exports = mongoose.model('LiveWall', liveWallSchema);
