@@ -1,5 +1,5 @@
-const { loveStoryService, albumService } = require('../services');
-const { verifyJWT } = require('../utils/auth');
+const { loveStoryService } = require('../services');
+const Album = require('../models/Album');
 
 // Love Story controllers
 const loveStoryController = {
@@ -7,19 +7,15 @@ const loveStoryController = {
   async getLoveStory(req, res) {
     try {
       const { albumId } = req.params;
-      
-      // Verify album exists
-      const album = await albumService.getAlbumByShareCode(albumId);
+
+      // Verify album exists by ID
+      const album = await Album.findById(albumId);
       if (!album) {
-        // Try to find by ID if shareCode fails
-        const albumById = await albumService.updateAlbumInfo(albumId, {});
-        if (!albumById) {
-          return res.status(404).json({ error: 'Album not found' });
-        }
+        return res.status(404).json({ error: 'Album not found' });
       }
-      
+
       const loveStory = await loveStoryService.getLoveStoryByAlbumId(albumId);
-      
+
       res.status(200).json({ loveStory });
     } catch (error) {
       res.status(500).json({ error: error.message });

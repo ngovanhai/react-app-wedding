@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/album/[shareCode]/page": "app/album/[shareCode]/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/[slug]/page": "app/[slug]/page.js",
+  "/dashboard/guests/[id]/page": "app/dashboard/guests/[id]/page.js",
+  "/create/page": "app/create/page.js",
+  "/editor-template/[id]/page": "app/editor-template/[id]/page.js",
+  "/info-form/page": "app/info-form/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/register/page": "app/register/page.js",
+  "/select-template/page": "app/select-template/page.js",
+  "/templates/page": "app/templates/page.js",
+  "/upload/page": "app/upload/page.js"
+}

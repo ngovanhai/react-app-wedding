@@ -49,6 +49,5 @@ const loveStorySchema = new mongoose.Schema({
 });
 
 const LoveStory = mongoose.model('LoveStory', loveStorySchema);
-const TimelineEvent = mongoose.model('TimelineEvent', timelineEventSchema);
 
-module.exports = { LoveStory, TimelineEvent };
+module.exports = LoveStory;

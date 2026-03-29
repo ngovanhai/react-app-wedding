@@ -1,0 +1,211 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// ─────────────────────────────────────────────
+// User & Auth
+// ─────────────────────────────────────────────
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  password     String?   // null if OAuth only
+  name         String
+  avatar       String?
+  plan         Plan      @default(FREE)
+  planExpiry   DateTime?
+  provider     String?   // "google" | "facebook" | null
+  providerId   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  invitations  Invitation[]
+  payments     Payment[]
+  mediaFiles   MediaFile[]
+
+  @@map("users")
+}
+
+enum Plan {
+  FREE
+  BASIC
+  PREMIUM
+}
+
+// ─────────────────────────────────────────────
+// Templates
+// ─────────────────────────────────────────────
+model Template {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  tier        Plan       @default(FREE)  // FREE | BASIC | PREMIUM
+  category    String     // "hien-dai" | "co-dien" | "toi-gian"
+  thumbnail   String     // URL
+  configJson  Json       // Template default config
+  isActive    Boolean    @default(true)
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  invitations Invitation[]
+
+  @@map("templates")
+}
+
+// ─────────────────────────────────────────────
+// Invitations (Core)
+// ─────────────────────────────────────────────
+model Invitation {
+  id              String            @id @default(uuid())
+  userId          String
+  templateId      String?
+  title           String            @default("Thiệp cưới của tôi")
+  slug            String            @unique
+  status          InvitationStatus  @default(DRAFT)
+  configJson      Json              @default("{}") // All editor data
+  // Wedding info fields
+  groomName       String?
+  brideName       String?
+  venue           String?
+  weddingDate     DateTime?
+  backgroundMusic String?
+  customCss       String?
+  publishedAt     DateTime?
+  viewCount       Int               @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template     Template?         @relation(fields: [templateId], references: [id])
+  guests       Guest[]
+  messages     Message[]
+  analytics    AnalyticsEvent[]
+
+  @@map("invitations")
+}
+
+enum InvitationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ─────────────────────────────────────────────
+// Guests & RSVP
+// ─────────────────────────────────────────────
+model Guest {
+  id            String      @id @default(uuid())
+  invitationId  String
+  name          String
+  phone         String?
+  email         String?
+  side          GuestSide   @default(BOTH)  // "groom" | "bride" | "both"
+  rsvpStatus    RSVPStatus  @default(PENDING)
+  partySize     Int         @default(1)
+  note          String?
+  rsvpAt        DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  invitation    Invitation  @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+
+  @@map("guests")
+}
+
+enum GuestSide {
+  GROOM
+  BRIDE
+  BOTH
+}
+
+enum RSVPStatus {
+  PENDING
+  ATTENDING
+  DECLINED
+}
+
+// ─────────────────────────────────────────────
+// Guest Messages (Lời chúc)
+// ─────────────────────────────────────────────
+model Message {
+  id            String     @id @default(uuid())
+  invitationId  String
+  guestName     String
+  content       String
+  isApproved    Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+
+  invitation    Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+// ─────────────────────────────────────────────
+// Analytics
+// ─────────────────────────────────────────────
+model AnalyticsEvent {
+  id            String     @id @default(uuid())
+  invitationId  String
+  type          String     @default("VIEW") // "VIEW" | "RSVP_OPEN" | "RSVP_SUBMIT" | "SHARE"
+  metadata      Json?      // { guestName, device, country, referrer }
+  createdAt     DateTime   @default(now())
+
+  invitation    Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+
+  @@map("analytics_events")
+}
+
+// ─────────────────────────────────────────────
+// Media Files
+// ─────────────────────────────────────────────
+model MediaFile {
+  id          String    @id @default(uuid())
+  userId      String
+  url         String    // Cloudinary URL
+  publicId    String    // Cloudinary public_id
+  type        String    // "image" | "audio"
+  size        Int       // bytes
+  filename    String
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("media_files")
+}
+
+// ─────────────────────────────────────────────
+// Payments
+// ─────────────────────────────────────────────
+model Payment {
+  id          String        @id @default(uuid())
+  userId      String
+  plan        Plan
+  amount      Int           // VND (e.g., 199000)
+  currency    String        @default("VND")
+  status      PaymentStatus @default(PENDING)
+  provider    String        @default("vnpay") // "vnpay" | "stripe"
+  orderId     String        @unique
+  transId     String?       // Provider transaction ID
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user        User          @relation(fields: [userId], references: [id])
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}

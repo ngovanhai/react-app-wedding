@@ -1,4 +1,5 @@
-const { LoveStory, Album } = require('../models');
+const LoveStory = require('../models/LoveStory');
+const Album = require('../models/Album');
 
 // Love Story services
 const loveStoryService = {

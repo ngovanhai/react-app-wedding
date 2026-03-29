@@ -1,187 +1,135 @@
-const User = require('../models/User');
-const { generateToken } = require('../utils/auth');
+// controllers/authController.js
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const prisma = require('../lib/prisma')
 
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+}
+
+
+/**
+ * Generate JWT token for user
+ */
+function signToken(userId) {
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  })
+}
+
+/**
+ * POST /api/auth/register
+ */
 const register = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name } = req.body
 
-    // Validate input
-    if (!email || !password || !name) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide email, password, and name'
-      });
+    // Check if email already exists
+    const existing = await prisma.user.findUnique({ where: { email } })
+    if (existing) {
+      return res.status(409).json({ error: 'Email đã được sử dụng' })
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists with this email'
-      });
-    }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create new user
-    const user = new User({
-      email,
-      password,
-      name,
-      role: 'user'
-    });
+    // Create user
+    const user = await prisma.user.create({
+      data: { email, password: hashedPassword, name },
+      select: { id: true, email: true, name: true, plan: true, createdAt: true },
+    })
 
-    await user.save();
-
-    // Generate token
-    const token = generateToken(user._id);
+    const token = signToken(user.id)
+    res.cookie('token', token, COOKIE_OPTIONS)
 
     res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt
-        },
-        token
-      }
-    });
+      data: { user, token },
+      message: 'Đăng ký thành công',
+    })
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during registration'
-    });
+    console.error('[Auth] register error:', error)
+    res.status(500).json({ error: 'Internal server error' })
   }
-};
+}
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
+/**
+ * POST /api/auth/login
+ */
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body
 
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide email and password'
-      });
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, name: true, password: true, plan: true, avatar: true },
+    })
+
+    if (!user || !user.password) {
+      return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng' })
     }
 
-    // Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    // Check password
-    const isMatch = await user.comparePassword(password);
+    // Verify password
+    const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
+      return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng' })
     }
 
-    // Generate token
-    const token = generateToken(user._id);
+    const token = signToken(user.id)
+    res.cookie('token', token, COOKIE_OPTIONS)
+
+    // Remove password from response
+    const { password: _, ...safeUser } = user
 
     res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt
-        },
-        token
-      }
-    });
+      data: { user: safeUser, token },
+      message: 'Đăng nhập thành công',
+    })
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during login'
-    });
+    console.error('[Auth] login error:', error)
+    res.status(500).json({ error: 'Internal server error' })
   }
-};
+}
 
-// @desc    Get current user
-// @route   GET /api/auth/me
-// @access  Private
+/**
+ * GET /api/auth/me
+ */
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select('-password');
-    
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        plan: true,
+        planExpiry: true,
+        createdAt: true,
+        _count: { select: { invitations: true } },
+      },
+    })
+
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+      return res.status(404).json({ error: 'User not found' })
     }
 
-    res.json({
-      success: true,
-      data: {
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt
-        }
-      }
-    });
+    res.json({ data: user })
   } catch (error) {
-    console.error('Get me error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error getting user info'
-    });
+    console.error('[Auth] getMe error:', error)
+    res.status(500).json({ error: 'Internal server error' })
   }
-};
+}
 
-// @desc    Logout user
-// @route   POST /api/auth/logout
-// @access  Private
-const logout = async (req, res) => {
-  try {
-    // In JWT-based auth, logout is handled client-side by removing the token
-    // Server-side we can add token to blacklist if needed, but for simplicity
-    // we just acknowledge the logout request
-    res.json({
-      success: true,
-      message: 'Logout successful'
-    });
-  } catch (error) {
-    console.error('Logout error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during logout'
-    });
-  }
-};
+/**
+ * POST /api/auth/logout
+ */
+const logout = (req, res) => {
+  res.clearCookie('token')
+  res.json({ message: 'Đã đăng xuất' })
+}
 
-module.exports = {
-  register,
-  login,
-  getMe,
-  logout
-};
+module.exports = { register, login, getMe, logout }

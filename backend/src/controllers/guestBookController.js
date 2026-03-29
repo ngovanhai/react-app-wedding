@@ -83,8 +83,9 @@ const addGuestMessage = async (req, res) => {
 // @access  Private (admin)
 const deleteGuestMessage = async (req, res) => {
   try {
-    const guest = await GuestBook.findByIdAndDelete(req.params.gid);
-    
+    // Find first to verify existence and ownership BEFORE deleting
+    const guest = await GuestBook.findById(req.params.gid);
+
     if (!guest) {
       return res.status(404).json({
         success: false,
@@ -99,6 +100,9 @@ const deleteGuestMessage = async (req, res) => {
         message: 'Guest message does not belong to this album'
       });
     }
+
+    // Only delete after ownership is confirmed
+    await GuestBook.findByIdAndDelete(req.params.gid);
 
     res.status(200).json({
       success: true,

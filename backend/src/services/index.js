@@ -1,6 +1,7 @@
 // Services for the wedding photo album app
 
-const { Album, GuestBookEntry } = require('../models');
+const { Album, GuestBook } = require('../models');
+// GuestBook is the guest book entry model
 const path = require('path');
 const fs = require('fs');
 const { loveStoryService } = require('./loveStoryService');
@@ -85,11 +86,10 @@ const guestBookService = {
   // Add guest book entry
   async addEntry(albumId, entryData) {
     try {
-      const entry = new GuestBookEntry({
+      const entry = new GuestBook({
         albumId,
-        name: entryData.name,
-        message: entryData.message,
-        email: entryData.email
+        guestName: entryData.name,
+        message: entryData.message
       });
       
       await entry.save();
@@ -102,8 +102,8 @@ const guestBookService = {
   // Get guest book entries for an album
   async getEntries(albumId) {
     try {
-      const entries = await GuestBookEntry.find({ albumId })
-        .sort({ createdAt: -1 }) // Sort by newest first
+      const entries = await GuestBook.find({ albumId })
+        .sort({ createdAt: -1 })
         .lean();
         
       return entries;
